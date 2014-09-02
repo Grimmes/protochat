@@ -11,18 +11,45 @@
 
 
 
+
+
+
+
 var app = angular.module('app', [
     'ngRoute',
     'global',
     'start',
-    'purr'
+    'purr',
+    'firebase'
 ]);
 
 app.config(['$routeProvider', function($routeProvider) {
 
     $routeProvider
 
-        .when('/', {templateUrl: './partials/start/start.html',controller:'startCtrl'})
+        .when('/', {templateUrl: './partials/start/start.html',controller:'startCtrl',resolve:{
+
+            userdata: function($q,User){
+
+                var username = User.getName(),
+                    defer = $q.defer();
+
+                if(!username){
+                    var result = window.prompt('Benutzername, bitte?');
+                    User.setName(result);
+                    defer.resolve();
+                } else{
+                    defer.resolve();
+                }
+
+                return defer.promise;
+
+            },
+
+            data: function(Chat){
+                return Chat.loadMessages();
+            }
+        }})
 
         .when('/404', {templateUrl: './partials/global/404.html',controller:'404Ctrl'})
 
@@ -34,13 +61,22 @@ app.config(['$routeProvider', function($routeProvider) {
 
 
 
-var SERVER = {
-
-};
+var FIREBASE = 'https://proto-chat.firebaseio.com/';
 var globalModule = angular.module('global',[]);
 globalModule.service('toolkit',function(){
 
     return{
+
+        // returns both getDate() and getTime()
+        getTimestamp: function(){
+
+            var timestamp;
+
+            timestamp = this.getDate() + ' ' + this.getTime();
+
+            return timestamp;
+
+        },
 
         /**
          * Returns the current date [YYYY-MM-DD or YYYY.MM.DD]
@@ -62,6 +98,17 @@ globalModule.service('toolkit',function(){
             }
 
             return today;
+        },
+
+        //returns the current time [HH:MM]
+        getTime: function(){
+
+            var today = new Date();
+            var hours = today.getHours();
+            var minutes = today.getMinutes();
+
+            return hours + ':' + minutes;
+
         },
 
         /**
@@ -862,14 +909,120 @@ purr.provider('purr',function(){
 globalModule.controller('404Ctrl',function(){
 
 });
+globalModule.service('User',function(){
+
+    var name;
+
+    this.setName = function(newName){
+        name = newName;
+        localStorage['username'] = name;
+    };
+
+    this.getName = function(){
+
+        if(localStorage['username']){
+            name = localStorage['username'];
+        }
+
+        return name;
+    };
+
+});
 var startModule = angular.module('start',[]);
-startModule.controller('startCtrl',function($scope,$location,$routeParams,Survey){
+startModule.controller('startCtrl',function($scope,Chat,MessageService){
 
-    $scope.year = $routeParams.year;
+    $scope.messages = Chat.messages;
 
-    $scope.startSurvey = function(){
+    $scope.addMessage = function(){
 
-        $location.path('/survey');
+        var message = MessageService.createMessage($scope.message);
+
+        Chat.postMessage(message);
+
+        $scope.message = '';
+    };
+
+});
+startModule.factory('MessageService',function(User,toolkit){
+
+    // Nachrichten Objekt zum Senden an den Chat erzeugen
+    function createMessage(message){
+
+        var message = {
+            poster: User.getName(),
+            value: message,
+            timestamp: toolkit.getTime()
+        };
+
+
+        return message;
+    }
+
+    return{
+        createMessage: createMessage
+    }
+
+
+});
+startModule.factory('Chat',function($firebase){
+
+    var ref = $firebase (new Firebase (FIREBASE + '/messages'));
+
+    /**
+     * Daten als Firebase Array laden
+     *
+     * @see https://www.firebase.com/docs/web/libraries/angular/api.html
+     */
+    var messages = ref.$asArray();
+
+    return{
+
+        messages: [],
+
+        loadMessages: function(){
+
+            //Daten per Service verfügbar machen
+            this.messages = messages;
+
+            //Promise zurückliefern um resolve im Router zu ermöglichen
+            return messages.$loaded();
+        },
+
+        postMessage: function(msg){
+            console.dir();
+            this.messages.$add(msg);
+        }
+
+    }
+
+});
+startModule.directive('prompt',function(MessageService,purr){
+
+    return{
+
+        restrict: 'A',
+        scope: false,
+        link: function(scope,element,attrs){
+
+            // Nachrichten durch Enter senden
+            function postOnEnter(e){
+
+                var message = MessageService.createMessage();
+
+                if(e.which == 13 && e.ctrlKey){
+
+                    e.preventDefault();
+
+                    scope.$apply(function(){
+                        scope.addMessage(message);
+                    });
+                }
+
+            }
+
+            element.bind('keydown',postOnEnter);
+
+        }
 
     }
 
