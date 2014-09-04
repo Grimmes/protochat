@@ -3,14 +3,14 @@
 <div class="msgContainer">
 
        <div class="historie" history-scroll>
-            <div ng-repeat="message in messages" class=" user-hover">
+    <div ng-repeat="message in messages" class=" user-hover">
 
-                <span class="usercolor">{{message.poster}}</span>
-                <span class="timestampcolor">{{message.timestamp}}</span>
-                <div class="line-break" ng-bind-html="message.value"></div>
+        <span class="usercolor">{{message.poster}}</span>
+        <span class="timestampcolor">{{message.timestamp}}</span>
+        <div class="line-break" ng-bind-html="message.value"></div>
 
-            </div>
-       </div>
+    </div>
+</div>
 
     <div class="inputarea">
         <textarea prompt="" ng-model="message" class="form-control bottom-hook-area" rows="3"></textarea>

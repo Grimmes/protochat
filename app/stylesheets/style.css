@@ -470,7 +470,6 @@ ul {
 [class^="icon-"]:before, [class*=" icon-"]:before {
   text-decoration: inherit;
   display: inline-block;
-  cursor: default;
   speak: none;
 }
 
@@ -2294,11 +2293,13 @@ a .icon-rotate-90:before, a .icon-rotate-180:before, a .icon-rotate-270:before, 
   width: 100%;
 }
 .master-class:hover {
-  background: darkgray;
+  background: #c3c3c3;
+  cursor: pointer;
 }
-.master-class:active {
-  background: #FFFFFF;
+.master-class:focus {
+  background: #c3c3c3;
   color: #000000;
+  cursor: text;
 }
 
 .cbp-spmenu {
@@ -2318,7 +2319,8 @@ a .icon-rotate-90:before, a .icon-rotate-180:before, a .icon-rotate-270:before, 
   padding: 20px;
   margin: 0;
   font-weight: 300;
-  background: darkgrey;
+  background: transparent;
+  border-bottom: 2px solid #000000;
 }
 
 /* Orientation-dependent styles for the content of the menu */

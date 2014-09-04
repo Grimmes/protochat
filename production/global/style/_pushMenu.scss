@@ -27,12 +27,14 @@
 
 
   &:hover {
-    background: darkgray;
+    background: #c3c3c3;
+    cursor: pointer;
   }
 
-  &:active {
-    background: #FFFFFF;
+  &:focus {
+    background: #c3c3c3;
     color: #000000;
+    cursor: text;
   }
 
 }
@@ -50,7 +52,8 @@
   padding: 20px;
   margin: 0;
   font-weight: 300;
-  background: darkgrey;
+  background: transparent;
+  border-bottom: 2px solid #000000;
 }
 
 /* Orientation-dependent styles for the content of the menu */
