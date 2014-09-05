@@ -17,10 +17,10 @@ html{
 
 body {
 
+
   @include vendor(transition, margin-top .75s);
   position: relative;
   min-height: 100%;
-  background: #e8e8e8;
   padding-top: 1px;
   overflow-y: hidden;
 }
